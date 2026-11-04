@@ -50,6 +50,14 @@ const PRICING_ICONS = ['/pricing/solo.png', '/pricing/team.png', '/pricing/scale
 
 type SessionWorkspace = NonNullable<ReturnType<typeof useSession>['workspace']>
 
+// A self-hosted install hands every workspace an illustration from a bucket the open source build
+// ships empty, and a logo read off a company's site can stop being served: either way, a bundled
+// image takes its place rather than a broken one.
+function WorkspaceIcon({ iconUrl, fallbackIconUrl, className }: { iconUrl: string | null; fallbackIconUrl: string; className?: string }) {
+    const [failed, setFailed] = useState(false)
+    return <img src={!iconUrl || failed ? fallbackIconUrl : iconUrl} alt="" onError={() => setFailed(true)} className={cn('shrink-0 rounded-full object-cover', className)} />
+}
+
 function workspaceSummary(workspace: SessionWorkspace): string {
     if (workspace.is_sandbox) return 'Expert sandbox'
     const trialing = workspace.subscription_status === 'trialing'
@@ -177,7 +185,7 @@ export function WorkspaceSwitcher() {
     const headerSection = (
         <div className="flex flex-col gap-2.5 p-1.5">
             <div className="flex items-center gap-2.5">
-                <img src={workspace.icon_url || activeIcon} alt="" className="size-8 shrink-0 rounded-full object-cover" />
+                <WorkspaceIcon key={workspace.icon_url} iconUrl={workspace.icon_url} fallbackIconUrl={activeIcon} className="size-8" />
                 <div className="min-w-0">
                     <div className="truncate text-sm font-medium text-foreground">{workspace.name || 'Workspace'}</div>
                     <div className="truncate text-xs text-muted-foreground">{workspaceSummary(workspace)}</div>
@@ -240,7 +248,7 @@ export function WorkspaceSwitcher() {
                 const active = w.id === workspace.id
                 return (
                     <DropdownMenuItem key={w.id} disabled={busy} onSelect={() => handleSwitch(w.id)} className={cn('gap-2', !active && 'text-muted-foreground')}>
-                        <img src={w.icon_url || PRICING_ICONS[index % PRICING_ICONS.length]} alt="" className="size-5 shrink-0 rounded-full object-cover" />
+                        <WorkspaceIcon iconUrl={w.icon_url} fallbackIconUrl={PRICING_ICONS[index % PRICING_ICONS.length]} className="size-5" />
                         <span className="flex-1 truncate">{w.name || 'Workspace'}</span>
                         {active && <CheckIcon className="size-4" />}
                     </DropdownMenuItem>
