@@ -31,3 +31,9 @@ export function brandIconFilter(src: string): string | undefined {
     if (tone === 'light') return 'var(--light-brand-icon-filter)'
     return undefined
 }
+
+// A logo is a URL: absolute when it lives in Storage, root-relative when it ships with the app, as
+// the catalogue of a self-hosted install does. Anything else is the name of a glyph.
+export function isBrandIconUrl(icon: string | null | undefined): icon is string {
+    return !!icon && /^(https?:\/\/|\/(?!\/))/i.test(icon)
+}

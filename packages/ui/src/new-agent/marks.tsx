@@ -1,6 +1,6 @@
 'use client'
 
-import { brandIconFilter } from '../brand-icon'
+import { brandIconFilter, isBrandIconUrl } from '../brand-icon'
 
 import type { CatalogEntry } from './types'
 import { cn } from '../cn'
@@ -9,7 +9,7 @@ import { cn } from '../cn'
 // mark is whitened on a dark surface, a white one blackened on a light one. An entry whose icon is
 // not a logo URL draws nothing, and keeps its place.
 export function AppLogo({ app, titled = true, className }: { app: CatalogEntry; titled?: boolean; className?: string }) {
-    if (!app.icon || !/^https?:\/\//i.test(app.icon)) return <span aria-label={app.name} className={cn('size-4 shrink-0', className)} />
+    if (!isBrandIconUrl(app.icon)) return <span aria-label={app.name} className={cn('size-4 shrink-0', className)} />
     return <img src={app.icon} alt={app.name} title={titled ? app.name : undefined} className={cn('size-4 shrink-0 object-contain', className)} style={{ filter: brandIconFilter(app.icon) }} />
 }
 
