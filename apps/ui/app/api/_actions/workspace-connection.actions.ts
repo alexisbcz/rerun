@@ -15,6 +15,8 @@ import {
     updateAiConnectionKeys,
 } from '@/app/api/_services/ai-connection.service'
 import { NoPlanError } from '@/app/api/_services/capacity.service'
+import { RERUN_CLOUD } from '@/cloud/edition'
+import { hasOpenRouterKey } from '@/lib/ai/openrouter'
 import type { ClaudeOAuthStart } from '@/lib/engine/claude-oauth'
 import type { CodexDeviceAuthStart } from '@/lib/engine/codex-oauth'
 import type { BoxConnection, BoxConnectionsList, BoxConnectionUsage, BoxDefault, CreateBoxConnectionInput, UpdateBoxConnectionInput } from '@/lib/engine/types'
@@ -42,6 +44,11 @@ export async function listAiConnectionsAction(): Promise<BoxConnectionsList> {
     } catch {
         return { connections: [], default: null }
     }
+}
+
+// A self-hosted install serves the Rerun models on its own OpenRouter key, and on nothing without one.
+export async function rerunModelsServedAction(): Promise<boolean> {
+    return RERUN_CLOUD || hasOpenRouterKey()
 }
 
 export async function setDefaultModelAction(pick: BoxDefault | null): Promise<Result> {

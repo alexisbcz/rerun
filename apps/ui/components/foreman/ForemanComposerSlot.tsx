@@ -5,6 +5,7 @@ import { useCallback, useLayoutEffect, useRef, useState, type Ref } from 'react'
 
 import { useMentionAutocomplete } from '@/components/chat/MentionAutocomplete'
 import { ForemanComposer, type ForemanComposerMentionProps, type ForemanComposerProps } from '@/components/foreman/ForemanComposer'
+import { ForemanConnectGate } from '@/components/foreman/ForemanConnectGate'
 import { ForemanSignInLink } from '@/components/foreman/ForemanSignInLink'
 import { ForemanSignupGate } from '@/components/foreman/ForemanSignupGate'
 import { ForemanTrialGate } from '@/cloud/billing.client'
@@ -46,12 +47,14 @@ type ForemanComposerSlotProps = Omit<ForemanComposerProps, keyof ForemanComposer
     gated: boolean
     /** La carte d'essai est posée et l'essai ne tourne pas encore : plus rien ne part. */
     trialGate: TrialStep | null
+    /** Rien ne peut répondre : le workspace n'a que les modèles Rerun, et l'install ne les sert pas. */
+    needsConnection: boolean
     ref?: Ref<HTMLDivElement>
 }
 
-export function ForemanComposerSlot({ aside, intake, gated, trialGate, ref, ...composer }: ForemanComposerSlotProps) {
+export function ForemanComposerSlot({ aside, intake, gated, trialGate, needsConnection, ref, ...composer }: ForemanComposerSlotProps) {
     const { isAnonymous } = useSession()
-    const bare = aside && !intake && !gated && !trialGate
+    const bare = aside && !intake && !gated && !trialGate && !needsConnection
 
     const { composerRef } = composer
     const mentionAgents = useForemanMentionAgents()
@@ -98,6 +101,10 @@ export function ForemanComposerSlot({ aside, intake, gated, trialGate, ref, ...c
                 ) : trialGate ? (
                     <motion.div key="trial-gate" {...SLOT_MOTION} className="overflow-hidden">
                         <ForemanTrialGate step={trialGate} />
+                    </motion.div>
+                ) : needsConnection ? (
+                    <motion.div key="connect-gate" {...SLOT_MOTION} className="overflow-hidden">
+                        <ForemanConnectGate />
                     </motion.div>
                 ) : aside ? null : (
                     <motion.div key="composer" {...SLOT_MOTION} className="overflow-hidden pb-px">

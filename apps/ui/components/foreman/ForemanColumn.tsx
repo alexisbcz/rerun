@@ -17,6 +17,7 @@ import { arrivalStepOf } from '@/components/foreman/arrival/flow'
 import { ForemanChatLayer } from '@/components/foreman/ForemanChatLayer'
 import { ForemanHeader } from '@/components/foreman/ForemanHeader'
 import { ForemanComposerSlot } from '@/components/foreman/ForemanComposerSlot'
+import { useForemanNeedsConnection } from '@/components/foreman/ForemanConnectGate'
 import { ForemanDockResizeHandle } from '@/components/foreman/ForemanDockResizeHandle'
 import { ForemanResizeHandle } from '@/components/foreman/ForemanResizeHandle'
 import { ForemanRoutines } from '@/components/foreman/ForemanRoutines'
@@ -279,6 +280,7 @@ export function ForemanColumn({ open, placement }: { open: boolean | null; place
     // du vocal passent par le seau du hub, sous la clé de cette conversation.
     // On the engine they live in the foreman's own workspace there, once the engine can take them.
     const surface = useForemanStore(state => state.surface)
+    const needsConnection = useForemanNeedsConnection(surface === 'engine')
     const [filesOnEngine, setFilesOnEngine] = useState(false)
     useEffect(() => {
         if (!open || surface !== 'engine') return
@@ -447,6 +449,7 @@ export function ForemanColumn({ open, placement }: { open: boolean | null; place
                         intake={intakeOpen ? intake : null}
                         gated={gated}
                         trialGate={trialGate}
+                        needsConnection={needsConnection}
                         aside={!!pendingWidget && !keepsComposer(pendingWidget)}
                         composerRef={composerRef}
                         sessionId={sessionId}

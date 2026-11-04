@@ -11,6 +11,7 @@ import { LIBRARY_COLUMNS, toLibraryTemplates, type LibraryRow } from '@/lib/temp
 import { createServiceRoleClient } from '@/supabase/serviceRole'
 import { selectMany, selectMaybeSingle } from '@/supabase/supabase-helpers'
 import { AGENT_COLUMNS, SPACE_COLUMNS } from './board-map'
+import { hubForemanApiKey } from './hub-model'
 import type { KickoffIntent } from './kickoff-marker'
 import { preferredLanguage } from './language'
 import { stampWorkspaceOnboarded } from './profile'
@@ -62,7 +63,9 @@ export async function loadForemanState(ctx: WorkspaceContext, acceptLanguage: st
     const input = { foreman, onboardingCompletedAt, entitled, trialing, agentCount: agents?.length ?? 0 }
     // A sandbox is an expert's workspace, handed its machine when it is created: it never goes
     // through the onboarding, and talks to the foreman on that machine from the start.
-    const pastOnboarding = ctx.workspace.is_sandbox || foremanPhase(input) === 'companion'
+    // Without a key for the onboarding foreman, an account skips it. The visitor keeps the welcome
+    // card, which runs on no model at all.
+    const pastOnboarding = ctx.workspace.is_sandbox || foremanPhase(input) === 'companion' || (!hubForemanApiKey() && !ctx.authUser.is_anonymous)
     // The pool is only asked for an account still in the funnel: a companion has its machine, and
     // an anonymous visitor is never stamped, or bot traffic would fill the list.
     const waitlisted = !pastOnboarding && !ctx.authUser.is_anonymous && (await resolveEngineWaitlist(ctx.workspace.id))
